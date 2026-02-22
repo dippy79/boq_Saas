@@ -1,0 +1,14 @@
+{
+  "name": "BOQ_SAAS",
+  "image": "ghcr.io/cirruslabs/flutter:stable",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Dart-Code.flutter",
+        "Dart-Code.dart-code",
+        "supabase.supabase"
+      ]
+    }
+  },
+  "forwardPorts": [3000]
+}

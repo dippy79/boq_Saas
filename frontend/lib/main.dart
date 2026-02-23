@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/supabase/supabase_config.dart';
-import 'package:frontend/features/auth/presentation/auth_gate.dart';
+import 'core/supabase/supabase_config.dart';
+import 'features/auth/presentation/auth_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await SupabaseConfig.initialize();
-
   runApp(const BOQSaasApp());
 }
 
@@ -15,12 +13,8 @@ class BOQSaasApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'BOQ SaaS',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: AuthGate(),
     );
   }

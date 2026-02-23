@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/auth/data/auth_service.dart';
-import 'package:frontend/features/auth/presentation/login_screen.dart';
-import 'package:frontend/features/auth/presentation/dashboard_screen.dart';
+import 'login_screen.dart';
+import 'dashboard_screen.dart';
+import '../data/auth_service.dart';
+class AuthGate extends StatefulWidget {
+  const AuthGate({super.key});
 
-class AuthGate extends StatelessWidget {
-  final AuthService _authService = AuthService();
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
 
-  AuthGate({super.key});
+class _AuthGateState extends State<AuthGate> {
+  final _authService = AuthService();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _authService.authStateChanges.listen((event) {
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: _authService.authState,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-
-        final user = _authService.currentUser;
-        if (user != null) {
-          return const DashboardScreen();
-        } else {
-          return const LoginScreen();
-        }
-      },
-    );
+    if (_authService.currentSession != null) {
+      return const DashboardScreen();
+    } else {
+      return const LoginScreen();
+    }
   }
 }

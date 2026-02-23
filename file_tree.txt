@@ -1,0 +1,19 @@
+boq_Saas/
+└── frontend/
+    └── lib/
+        ├── main.dart
+        │
+        ├── core/
+        │   └── supabase/
+        │       └── supabase_config.dart
+        │
+        ├── features/
+        │   └── auth/
+        │       ├── presentation/
+        │       │   ├── auth_gate.dart
+        │       │   ├── login_screen.dart
+        │       │   └── dashboard_screen.dart
+        │       │
+        │       └── data/
+        │           └── auth_service.dart
+

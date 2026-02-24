@@ -1,24 +1,28 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../core/supabase/supabase_config.dart';
 
 class AuthService {
-  final SupabaseClient _client = SupabaseConfig.client;
+  final SupabaseClient _supabase = Supabase.instance.client;
 
-  Session? get currentSession => _client.auth.currentSession;
+  // ✅ ADD THIS GETTER (this was missing)
+  User? get currentUser => _supabase.auth.currentUser;
 
-  User? get currentUser => _client.auth.currentUser;
-
-  Stream<AuthState> get authStateChanges =>
-      _client.auth.onAuthStateChange;
-
-  Future<void> sendMagicLink(String email) async {
-    await _client.auth.signInWithOtp(
+  Future<AuthResponse> signUp(String email, String password) async {
+    final response = await _supabase.auth.signUp(
       email: email,
-      emailRedirectTo: Uri.base.origin,
+      password: password,
     );
+    return response;
+  }
+
+  Future<AuthResponse> signIn(String email, String password) async {
+    final response = await _supabase.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+    return response;
   }
 
   Future<void> signOut() async {
-    await _client.auth.signOut();
+    await _supabase.auth.signOut();
   }
 }

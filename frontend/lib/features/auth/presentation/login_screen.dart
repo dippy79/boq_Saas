@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/auth_service.dart';
+import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,26 +10,58 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _authService = AuthService();
-  final _emailController = TextEditingController();
+  final AuthService _authService = AuthService();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool _isLogin = true;
   bool _isLoading = false;
 
-  Future<void> _sendMagicLink() async {
-    setState(() => _isLoading = true);
+  Future<void> _handleAuth() async {
+    setState(() {
+      _isLoading = true;
+    });
 
-    await _authService.sendMagicLink(
-      _emailController.text.trim(),
-    );
+    try {
+      if (_isLogin) {
+        final response = await _authService.signIn(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
 
-    setState(() => _isLoading = false);
+        if (response.user != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const DashboardScreen()),
+          );
+        }
+      } else {
+        final response = await _authService.signUp(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
 
-    if (mounted) {
+        if (response.user != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const DashboardScreen()),
+          );
+        }
+      }
+    } catch (e) {
+      print("AUTH ERROR: $e");
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Magic link sent! Check your email."),
+        SnackBar(
+          content: Text("Error: $e"),
+          backgroundColor: Colors.red,
         ),
       );
     }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -38,13 +71,14 @@ class _LoginScreenState extends State<LoginScreen> {
         child: SizedBox(
           width: 350,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
                 "BOQ SaaS Login",
                 style: TextStyle(fontSize: 24),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 30),
+
               TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(
@@ -52,12 +86,43 @@ class _LoginScreenState extends State<LoginScreen> {
                   border: OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 16),
+
+              const SizedBox(height: 15),
+
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: "Password",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
               ElevatedButton(
-                onPressed: _isLoading ? null : _sendMagicLink,
+                onPressed: _isLoading ? null : _handleAuth,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 45),
+                ),
                 child: _isLoading
-                    ? const CircularProgressIndicator()
-                    : const Text("Send Magic Link"),
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(_isLogin ? "Login" : "Sign Up"),
+              ),
+
+              const SizedBox(height: 15),
+
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isLogin = !_isLogin;
+                  });
+                },
+                child: Text(
+                  _isLogin
+                      ? "Don't have an account? Sign Up"
+                      : "Already have an account? Login",
+                ),
               ),
             ],
           ),

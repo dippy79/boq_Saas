@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'core/supabase/supabase_config.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'features/auth/presentation/auth_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-  const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  // Load .env file
+  await dotenv.load(fileName: ".env");
 
-  await Supabase.initialize(
-    url: supabaseUrl,
-    anonKey: supabaseAnonKey,
-    authOptions: const FlutterAuthClientOptions(
-      authFlowType: AuthFlowType.pkce, // 🔥 important for web
-    ),
-  );
+final supabaseUrl = dotenv.env['SUPABASE_URL'];
+final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
+
+if (supabaseUrl == null || supabaseAnonKey == null) {
+  throw Exception("SUPABASE credentials not found in .env file");
+}
+
+await Supabase.initialize(
+  url: supabaseUrl,
+  anonKey: supabaseAnonKey,
+);
 
   runApp(const BOQSaasApp());
 }

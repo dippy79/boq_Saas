@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../data/auth_service.dart';
 import 'login_screen.dart';
 import 'dashboard_screen.dart';
 
@@ -12,13 +11,8 @@ class AuthGate extends StatelessWidget {
     return StreamBuilder<AuthState>(
       stream: Supabase.instance.client.auth.onAuthStateChange,
       builder: (context, snapshot) {
-        final session = Supabase.instance.client.auth.currentSession;
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
+        final session =
+            Supabase.instance.client.auth.currentSession;
 
         if (session != null) {
           return const DashboardScreen();

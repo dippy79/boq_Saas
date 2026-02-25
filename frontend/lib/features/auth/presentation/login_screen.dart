@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../data/auth_service.dart';
-import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,33 +23,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       if (_isLogin) {
-        final response = await _authService.signIn(
+        await _authService.signIn(
           _emailController.text.trim(),
           _passwordController.text.trim(),
         );
-
-        if (response.user != null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const DashboardScreen()),
-          );
-        }
       } else {
-        final response = await _authService.signUp(
+        await _authService.signUp(
           _emailController.text.trim(),
           _passwordController.text.trim(),
         );
-
-        if (response.user != null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const DashboardScreen()),
-          );
-        }
       }
     } catch (e) {
-      print("AUTH ERROR: $e");
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Error: $e"),
@@ -74,9 +57,13 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                "BOQ SaaS Login",
-                style: TextStyle(fontSize: 24),
+                "BOQ SaaS",
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+
               const SizedBox(height: 30),
 
               TextField(

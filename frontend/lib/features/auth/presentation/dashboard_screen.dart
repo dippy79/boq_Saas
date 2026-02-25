@@ -1,155 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../data/project_service.dart';
-import 'project_detail_screen.dart';
 
-class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+class DashboardScreen extends StatelessWidget {
+  final String? projectName;
 
-  @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
-}
+  const DashboardScreen({super.key, this.projectName});
 
-class _DashboardScreenState extends State<DashboardScreen> {
-  final ProjectService _projectService = ProjectService();
-  final TextEditingController _projectController = TextEditingController();
-
-  List<Map<String, dynamic>> _projects = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadProjects();
-  }
-
-  Future<void> _loadProjects() async {
-    try {
-      final data = await _projectService.fetchProjects();
-      setState(() {
-        _projects = data;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _createProject() async {
-    final name = _projectController.text.trim();
-    if (name.isEmpty) return;
-
-    await _projectService.createProject(name);
-    _projectController.clear();
-    Navigator.pop(context);
-    _loadProjects();
-  }
+  String get userEmail => Supabase.instance.client.auth.currentUser?.email ?? "Unknown User";
 
   @override
   Widget build(BuildContext context) {
-    final user = Supabase.instance.client.auth.currentUser;
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text("BOQ SaaS Dashboard"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await Supabase.instance.client.auth.signOut();
-            },
-          )
-        ],
+        title: Text("Dashboard - ${projectName ?? 'Project'}"),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Welcome ${user?.email ?? ""}",
+              "Welcome, $userEmail",
               style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold),
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-
             const SizedBox(height: 20),
 
-            ElevatedButton.icon(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text("Create Project"),
-                    content: TextField(
-                      controller: _projectController,
-                      decoration: const InputDecoration(
-                        labelText: "Project Name",
+            // Quick Actions / Projects Cards
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 15,
+                mainAxisSpacing: 15,
+                children: List.generate(4, (index) {
+                  return InkWell(
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Feature ${index + 1} clicked!")),
+                      );
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurple[100 * ((index + 2) % 9)],
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 6,
+                            offset: const Offset(2, 4),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Feature ${index + 1}",
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Cancel"),
-                      ),
-                      ElevatedButton(
-                        onPressed: _createProject,
-                        child: const Text("Create"),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              icon: const Icon(Icons.add),
-              label: const Text("Create New Project"),
-            ),
-
-            const SizedBox(height: 30),
-
-            const Text(
-              "Your Projects",
-              style:
-                  TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 10),
-
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _projects.isEmpty
-                      ? const Center(child: Text("No projects yet"))
-                      : ListView.builder(
-                          itemCount: _projects.length,
-                          itemBuilder: (context, index) {
-                            final project = _projects[index];
-                            return Card(
-                              child: ListTile(
-                                title: Text(
-                                  project['name'] ?? '',
-                                  softWrap: true,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                subtitle: Text(
-                                  project['created_at']?.toString() ?? '',
-                                  softWrap: true,
-                                ),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => ProjectDetailScreen(
-                                        projectId: project['id'],
-                                        projectName: project['name'] ?? '',
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            );
-                          },
-                        ),
+                  );
+                }),
+              ),
             ),
           ],
         ),

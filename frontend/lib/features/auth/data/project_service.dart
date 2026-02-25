@@ -1,49 +1,32 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class ProjectService {
-  final SupabaseClient _supabase = Supabase.instance.client;
+class ProjectsService {
+  final SupabaseClient _client = Supabase.instance.client;
 
-  Future<List<Map<String, dynamic>>> fetchProjects() async {
-    final user = _supabase.auth.currentUser;
-    if (user == null) return [];
-
-    final response = await _supabase
+  Future<List<Map<String, dynamic>>> fetchProjects(String userId) async {
+    final response = await _client
         .from('projects')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', ascending: false);
-    
-    return List<Map<String, dynamic>>.from(response);
+        .select()
+        .eq('user_id', userId)
+        .execute();
+
+    if (response.error != null) {
+      throw Exception(response.error!.message);
+    }
+
+    final data = response.data as List<dynamic>;
+    return data.map((e) => e as Map<String, dynamic>).toList();
   }
 
-  Future<void> createProject(String name) async {
-    final user = _supabase.auth.currentUser;
-    if (user == null) return;
+  Future<void> createProject(String userId, String projectName) async {
+    final response = await _client.from('projects').insert({
+      'user_id': userId,
+      'project_name': projectName,
+      'created_at': DateTime.now().toIso8601String(),
+    }).execute();
 
-    await _supabase.from('projects').insert({
-      'name': name,
-      'user_id': user.id,
-    });
-  }
-
-  Future<List<Map<String, dynamic>>> fetchProjectItems(String projectId) async {
-    final response = await _supabase
-        .from('project_items')
-        .select('*')
-        .eq('project_id', projectId)
-        .order('created_at', ascending: false);
-    
-    return List<Map<String, dynamic>>.from(response);
-  }
-
-  Future<void> addProjectItem(String projectId, Map<String, dynamic> item) async {
-    await _supabase.from('project_items').insert({
-      ...item,
-      'project_id': projectId,
-    });
-  }
-
-  Future<void> deleteProjectItem(int itemId) async {
-    await _supabase.from('project_items').delete().eq('id', itemId);
+    if (response.error != null) {
+      throw Exception(response.error!.message);
+    }
   }
 }

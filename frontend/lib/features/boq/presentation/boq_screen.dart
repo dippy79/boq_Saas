@@ -36,9 +36,11 @@ class _BoqScreenState extends State<BoqScreen> {
         _items = items;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error fetching items: $e"), backgroundColor: Colors.red),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error fetching items: $e"), backgroundColor: Colors.red),
+        );
+      }
     }
     setState(() => _isLoading = false);
   }
@@ -75,9 +77,11 @@ class _BoqScreenState extends State<BoqScreen> {
       _rateController.clear();
       await _fetchItems();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error adding item: $e"), backgroundColor: Colors.red),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error adding item: $e"), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -86,9 +90,11 @@ class _BoqScreenState extends State<BoqScreen> {
       await _boqService.deleteItem(id);
       await _fetchItems();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error deleting item: $e"), backgroundColor: Colors.red),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error deleting item: $e"), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
